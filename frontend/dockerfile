@@ -1,0 +1,28 @@
+# Frontend Dockerfile — robust startup with SPA fallback
+# Ensures an index.html exists at runtime, then serves dist/build/public
+
+FROM node:20-alpine
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Copy all frontend assets (public/, build/, dist/, etc.)
+COPY . .
+
+# Install small static server
+RUN npm i -g serve@14
+
+# Add robust startup script
+COPY start.sh /usr/local/bin/start.sh
+# Fix Windows CRLF line endings if present to avoid "exec format error" or immediate exit
+RUN sed -i 's/\r$//' /usr/local/bin/start.sh && chmod +x /usr/local/bin/start.sh
+
+EXPOSE 3000
+
+# Optional healthcheck (root must respond)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:${PORT}/ >/dev/null 2>&1 || exit 1
+
+# Use ENTRYPOINT so Terraform cannot accidentally override with an empty command
+ENTRYPOINT ["/usr/local/bin/start.sh"]
