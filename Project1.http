@@ -1,0 +1,10 @@
+@Project1_HostAddress = https://localhost:7059
+
+
+GET {{Project1_HostAddress}}/api/project1
+
+###
+
+GET {{Project1_HostAddress}}/api/project1
+
+###
