@@ -1,0 +1,46 @@
+# Backend Dockerfile (Node/Express) — Debian-based to avoid native build issues
+# - Installs build tools so native deps (e.g., bcrypt) compile successfully
+# - Installs only production deps
+# - Runs dist/server.js -> server.js -> package.json main -> sleeps if none
+
+FROM node:20-bullseye-slim
+WORKDIR /usr/src/app
+
+ENV NODE_ENV=production
+ENV PORT=8080
+
+# Copy all sources (tolerant even if package.json is absent)
+COPY . .
+
+# Build tools for native modules (bcrypt, etc.)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      python3 make g++ ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install deps only if package.json exists
+RUN if [ -f package.json ]; then \
+      if [ -f package-lock.json ]; then npm ci --omit=dev; \
+      elif [ -f yarn.lock ]; then npm i -g yarn && yarn install --production --frozen-lockfile; \
+      elif [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i --frozen-lockfile --prod; \
+      else npm install --omit=dev; fi; \
+    else \
+      echo "No package.json found; skipping dependency install"; \
+    fi
+
+# Optional build step if scripts.build exists
+RUN if [ -f package.json ] && node -e "p=require('./package.json');process.exit(p.scripts&&p.scripts.build?0:1)"; then \
+      npm run build; \
+    else \
+      echo "No build script; skipping"; \
+    fi
+
+EXPOSE 8080
+
+# Optional healthcheck: hit /health (will pass even if DB is down)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:8080/health >/dev/null 2>&1 || exit 1
+
+CMD sh -c 'if [ -f dist/server.js ]; then node dist/server.js; \
+           elif [ -f server.js ]; then node server.js; \
+           elif node -e "require(\"./package.json\").main" >/dev/null 2>&1; then node .; \
+           else echo "No entrypoint found. Sleeping..."; sleep 3600; fi'

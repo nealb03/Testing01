@@ -1,0 +1,13 @@
+node_modules npm-debug.log* yarn-error.log* pnpm-debug.log*
+
+coverage dist .tmp .cache
+
+.git .gitignore .gitattributes
+
+.vscode .idea .DS_Store Thumbs.db
+
+.env .env.* *.local
+
+docker-compose*.yml *.tar *.tgz *.zip
+
+**/pycache/ **/.swp **/.swx

@@ -1,0 +1,6 @@
+C:\nealb03\Project1\Project1\obj\Debug\net7.0\rpswa.dswa.cache.json
+C:\nealb03\Project1\Project1\obj\Debug\net7.0\Project1.GeneratedMSBuildEditorConfig.editorconfig
+C:\nealb03\Project1\Project1\obj\Debug\net7.0\Project1.AssemblyInfoInputs.cache
+C:\nealb03\Project1\Project1\obj\Debug\net7.0\Project1.AssemblyInfo.cs
+C:\nealb03\Project1\Project1\obj\Debug\net7.0\Project1.csproj.CoreCompileInputs.cache
+C:\nealb03\Project1\Project1\obj\Debug\net7.0\Project1.MvcApplicationPartsAssemblyInfo.cache
